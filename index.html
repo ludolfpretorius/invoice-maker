@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Invoice Builder</title>
+
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+	<style type="text/css">
+
+		[v-cloak] {display: none;}
+		
+		body {margin: 0;}
+		#app {background-color: #1f2227/*#f3f3ff*/; padding: 60px 0; font-family: Montserrat, sans-serif; color: #53565d; line-height: 29px; outline-style: dashed;}
+
+		.site-title {color: /*#1576d4*/ #448AFF; font-weight: 700; margin: 0 40px 40px; text-align: center;}
+
+		.btns-wrap {position: fixed; top: 59px; right: 0; left: 0; margin: auto; transform: translateX(560px); width: 150px; z-index: 1}/* position: fixed; top: 59px; right: 350px;*/
+		.btn {color: #fff; background-color: /*#f48164;*/ #1a1d21; border-radius: 40px; text-decoration: none; margin-bottom: 15px; width: 53px; height: 53px; 	transition: all 0.2s ease; display: block; position: relative;}
+		/*.btn:nth-child(2) {background-color: #AED581}
+		.btn:nth-child(3) {background-color: #42A5F5}*/
+		.btn span.icon {display: inline-flex; align-items: center; justify-content: center; width: 53px; height: 53px;}
+		.btn span.icon i {font-size: 23px;}
+		.btn span.btn-text {margin-left: 15px; opacity: 0; pointer-events: none; transition: all 0.1s ease; position: absolute; top: 12px; left: 20px; font-size: 17px; white-space: nowrap;}
+		.btn:hover {padding: 0 10px;}
+		.btn:hover span.btn-text {opacity: 1; pointer-events: all; transition: all 0.2s ease 0.05s; left: 41px;}
+		.btn:nth-child(1):hover {width: 170px}
+		.btn:nth-child(2):hover {width: 105px}
+		.btn:nth-child(3):hover {width: 115px}
+		.btn:nth-child(4):hover {width: 145px}
+		.btn .saved {position: absolute; top: 0; bottom: 0; display: flex; justify-content: center; align-items: center; right: -70px; opacity: 0; transition: all 0.2s ease;}
+		.btn .saved.show {opacity: 1; right: -90px;}
+
+		.page {max-width: 740px; min-height: 750px; margin: auto; background-color: #fff; padding: 80px 80px 350px; box-shadow: 0px 1px 20px rgba(0, 0, 0, 0.07); position: relative;}
+		input, select, textarea {color: #53565d;}
+		.edit {transition: all 0.2s ease; outline: 1px solid transparent;}
+		.edit:hover {outline: 1px solid #cbd4db; padding: 0 10px;}
+		.editing {padding: 0 10px; box-shadow: inset 0 1px #e8ecee; outline: 1px solid #9ca6af;}
+		.editing:hover {box-shadow: inset 0 1px #e8ecee; outline: 1px solid #9ca6af;}
+
+		.logo-wrap {width: 170px; margin-left: -16px; position: relative; display: inline-block; min-height: 85px;}
+		.logo-wrap img {max-width: 100%;}
+		.logo-wrap .remove-logo {width: 30px; height: 30px; right: -25px; top: -25px; text-decoration: none; font-size: 28px; color: #fff; background-color: #f48164; display: flex; justify-content: center; align-items: center; border-radius: 100%; display: none;}
+		.logo-wrap .remove-logo:hover {background-color: #fb9d85}
+		.logo-wrap .remove-logo.show {display: flex}
+
+		[type="file"] {border: 0; clip: rect(0, 0, 0, 0); height: 1px; overflow: hidden; padding: 0; position: absolute !important; white-space: nowrap; width: 1px; }
+		[type="file"] + label {padding: 8px; background-color: rgba(255,255,255,0.9); cursor: pointer; position: absolute; margin: auto; top: 0; bottom: 0; left: 0; right: 0; transform: translate(-14px, -5px); height: 100%; width: 105%; color: #999; font-weight: 500; display: flex; justify-content: center; align-items: center; flex-direction: column; border: 1px dashed #ccc; border-radius: 10px;}
+		[type="file"]:focus + label, [type="file"] + label:hover {background-color: #fff; /*padding: 12px; transform: translate(-18px, -7px);*/ border-style: solid;}
+		/*[type="file"]:focus + label {outline: 1px dotted #000;}*/
+		[type="file"] + label i {font-size: 40px}
+
+		.info {float: right; font-size: 14px; text-align: right; line-height: 24px;}
+		.info strong {line-height: 24px;}
+		.moreInfo { margin: 0; line-height: 24px; font-size: 14px; max-width: 350	px; float: right; margin-bottom: 20px;}
+		h1 {line-height: 36px; font-weight: 400; margin: 50px 0 40px; font-size: 30px}
+		
+		table {width: 100%; text-align: left;}
+		table td, table th {}
+
+		table.client {margin-bottom: 40px;}
+		table.client td, table.client th {width: 50%;}
+		table.client td p, table.client th {font-size: 14px; line-height: 24px; margin: 0;}
+		table.client td p { width: 80%;}
+		
+		table.productDetails td, table.productDetails th {border-bottom: 1px solid #ddd;  font-size: 12px; padding: 12px 10px 12px 0;}
+		table.productDetails td p, table.productDetails th p {margin: 0; font-size: 14px; }
+		table.productDetails td p {line-height: 24px;}
+
+		table.productDetails td:last-child, table.productDetails th:last-child {text-align: right; width: 12%;}
+		.option {opacity: 0; pointer-events: none; transition: all 0.2s ease;  position: absolute; }
+		.option-btn {border: 1px dashed #ccc; border-radius: 4px; padding: 13px 10px 10px; display: inline-flex; justify-content: center; align-items: center; cursor: pointer; height: 20px; margin-bottom: 7px; position: relative; transition: all 0.1s ease}
+		.option-btn:hover {border-style: solid}
+		.option i {font-size: 24px; color: #ccc;}
+		.option .fas.fa-plus-circle, .option i.fa-minus-circle {font-size: 12px; position: absolute; right: 3px; top: 6px; color: #999;}
+		.option.add {}
+		.option.remove {left: 190px;}
+		
+		.cols {margin-top: 15px;}
+		.cols .option-btn {margin-right: 4px;}
+		.rows {display: flex; flex-direction: column; right: 18px; margin-top: -99px;}
+		.rows .option-btn:before {content: ''; position: absolute; width: 17px; height: 4.5px; background: #fff; top: 18.5px;}
+		.rows .option-btn:after {content: ''; position: absolute; width: 17px; height: 4.5px; background: #fff; top: 26px;}
+
+		
+
+		table.total {width: 50%; float: right;}
+		table.total td {border-bottom: 1px solid #ddd; padding: 15px 10px 15px 0;}
+		table.total td p {font-size: 14px; line-height: 24px; margin: 0;}
+		table.total tr:first-child td:first-child {width: 12%/*calc(70%/2)*/;}
+		table.total td:last-child {width: 30%; text-align: right; padding: 0px 10px 0px 0;}
+		table.total tr:first-child td:first-child {font-weight: 700}
+		table.total tr:last-child td {font-weight: 700}
+		table.total tr:last-child td:last-child {border-color: #f48164;}
+		
+		.footer {display: flex; justify-content: space-between; align-items: flex-end; width: calc(100% - 160px); position: absolute; bottom: 80px; left: 80px;}
+		.contact {font-size: 12px;  left: 80px;}
+		.contact h3 {margin: 0; line-height: 24px;}
+		.contact p {margin: 0; line-height: 20px}
+		.banking {font-size: 12px; text-align: right}
+		.banking h3 {margin: 0; line-height: 24px;}
+		.banking p {margin: 0; line-height: 20px}
+
+		
+
+	</style>
+	
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+
+	<script src="https://code.jquery.com/jquery-3.5.0.min.js"integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ="crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+
+	
+
+<div id="app" >
+
+	<!-- <h1 class="site-title">Free Invoice/Quote Maker</h1> -->
+
+	<div class="btns-wrap">
+		<a href="javascript:;" class="btn print" @click="print()" title="Print/Save as PDF">
+			<span class="icon"><i class="fas fa-file-pdf"></i></span>
+			<span class="btn-text">Save as PDF</span>
+		</a>
+		<a href="javascript:;" class="btn save" @click="save()" title="Save all the fields of this document for quicker work next time">
+			<span class="icon"><i class="fas fa-save"></i></span>
+			<span class="btn-text">Save</span>
+			<span class="saved">💪 Saved!</span>
+		</a>
+		<a href="javascript:;" class="btn reset" @click="reset()" title="Reset all the fields of this document, including the logo">
+			<span class="icon"><i class="fas fa-redo-alt"></i></span>
+			<span class="btn-text">Reset</span>
+		</a>
+		<a href="javascript:;" class="btn currency" @click="changeCurrency()" title="Change the currency for this document">
+			<span class="icon"><i class="fas fa-dollar-sign"></i></span>
+			<span class="btn-text">Currency</span>
+		</a>
+	</div>
+
+	<div class="page" v-cloak @mouseover="showOptions()" @mouseleave="hideOptions()">
+		<div class="logo-wrap">
+			<input type="file" name="file" class="img-upload" @change="uploadImg()">
+			<label for="file" class="option img-upload-label" title="Click to upload a logo">
+				<i class="fas fa-image"></i>
+				<span>Upload logo</span>
+			</label>
+			<a href="javascript:;" class="remove-logo option" @click="removeLogo()" title="Remove current logo">×</a>
+		</div>
+		<div class="info">
+			<strong>Date: </strong><span :class="['edit']" @mousedown="edit($event)">{{ date() }}</span><br>
+			<strong>Due: </strong><span :class="['edit']" @mousedown="edit($event)" @blur="update($event, 'due')">{{ due }}</span><br>
+			<strong>Invoice number: </strong><span :class="['edit']" @mousedown="edit($event)" @blur="update($event, 'invoiceNum')">{{ invoiceNum }}</span><br>
+			<p class="moreInfo" :class="['edit']" @blur="update($event, 'moreInfo')" @mousedown="edit($event)" v-html="moreInfo"></p>
+		</div>
+		<h1 :class="['edit']" @mousedown="edit($event)" @blur="update($event, 'heading')">{{ heading }}</h1>
+		<table class="client" >
+			<tr>
+				<th>Client</th>
+				<th :class="['edit']" @mousedown="edit($event)">Liaison</th>
+			</tr>
+			<tr valign="top">
+				<td>
+					<p :class="['edit']" @blur="update($event, 'client')" @mousedown="edit($event)">{{ client }}</p>
+				</td>
+				<td>
+					<p :class="['edit']" @blur="update($event, 'person')" @mousedown="edit($event)">{{ person }}</p>
+				</td>
+			</tr>
+		</table>
+
+		<table class="productDetails" >
+			<tr>
+				<th v-for="(i, ind) in title">
+					<p :class="['edit', 'title-'+ind]" ref="edit" @mousedown="edit($event)" @blur="update($event, 'title')" :key="'titleArr-' + ind">{{ i }}</p>
+				</th>
+			</tr>
+			<tr class="row" v-for="(arr, ind) in productData" :key="'productDataArr-' + ind">
+				<td v-for="(i, iind) in arr">
+					<p :class="['edit', 'productData-'+ind+'-'+iind]" ref="edit" @mousedown="edit($event)" @blur="update($event, 'productData')" :key="'productDataArr-' + ind + 'arrItem' + iind">{{ i }}</p>
+				</td>
+			</tr> 
+		</table>
+		<div class="option rows">
+			<span class="option-btn remove" @click="removeRow()"><i class="fas fa-table" title="Remove row"></i><i class="fas fa-minus-circle"></i></span>
+			<span class="option-btn add" @click="addRow()" title="Add row"><i class="fas fa-table"></i><i class="fas fa-plus-circle"></i></span>
+		</div>
+		<div class="option cols">
+			<span class="option-btn remC" @click="removeColumn()" title="Remove column"><i class="fas fa-columns"></i><i class="fas fa-minus-circle"></i></span>
+			<span class="option-btn addC" @click="addColumn()" title="Add column"><i class="fas fa-columns"></i><i class="fas fa-plus-circle"></i></span>
+		</div>
+
+		<table class="total">
+			<tr>
+				<td><p>Tax:</p></td>
+				<td><p :class="['edit', 'tax']" @blur="calcTax()" @mousedown="edit($event)">{{ taxPercentage }}</p></td>
+				<td><p>{{ taxAmount }}</p></td>
+			</tr>
+			<tr>
+				<td colspan="2"><p>Total</p></td>
+				<td><p>{{ currency + total }}</p></td>
+			</tr>
+		</table>
+		
+		<div class="footer">
+			<div class="contact">
+				<h3>Contact</h3>
+				<p v-html="contact" :class="['edit']" @blur="update($event, 'contact')" @mousedown="edit($event)"></p>
+			</div>
+			<div class="banking">
+				<h3>Banking details</h3>
+				<p v-html="banking" :class="['edit']" @blur="update($event, 'banking')" @mousedown="edit($event)"></p>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+	window.location.href = '#' 
+
+	const vm = new Vue({
+		el: '#app',
+		data: {
+			logo: '',
+			invoiceNum: 12345,
+			due: 'Within 30 days',
+			moreInfo: `Add some notes... if you want`, //50% deposit and<br>50% on completion
+			heading: 'Invoice',
+			client: 'Prestige Worldwide',
+			person: 'Brennan',
+			title: ['Title', 'Price'],
+			productData: [['Add text', 0]],
+			taxPercentage: '0%',
+			taxAmount: 0,
+			total: 0,
+			currency: 'R',
+			contact: `Name Surname<br>your@email.com<br>084 000 0000`,
+			banking: `Bank name<br>Account holder<br>Account no. 00 000 000<br>Branch no. 000-000`, //Standard Bank<br>Mr. L I Pretorius<br>Account no. 27 255 512 6<br>Branch no. 050-210
+			allEditables: '',
+		},
+		created() {
+			if (localStorage.data) {
+				for (keys in JSON.parse(localStorage.data)) {
+					this[keys] = JSON.parse(localStorage.data)[keys] 
+				}
+			}
+		},
+		mounted() {
+			this.allEditables = [...document.querySelectorAll('.edit')];
+			document.addEventListener('mousedown', (event) => {
+				this.allEditables.forEach(i => {
+					!i.innerText.length ? i.innerHTML = '&nbsp;' : '';
+					i.contentEditable = false;
+					i.classList.remove('editing');
+				})
+			})
+			this.checkLogo();
+			this.doAmountTds();	
+			this.shortcuts();
+			this.addCss();
+			this.fixInput();
+			this.calcTax();
+		},
+		updated() {
+			this.$refs.edit.map(i => this.allEditables.push(i))
+			this.doAmountTds();
+			this.calcTotal();
+			this.addCss();
+		},
+		methods: {
+			shortcuts() {
+				this.allEditables.map((a, i) => {
+					a.addEventListener('keydown', (e) => {
+						if (e.which === 9) {
+							document.dispatchEvent(new Event('mousedown'));
+							this.allEditables[i+1].dispatchEvent(new Event('mousedown'))
+						}
+					})
+				})
+			},
+			addCss() {
+				const tds = [...document.querySelectorAll('.productDetails td')]
+				tds.map(a => {
+					if (!a.classList.contains('amount')) {
+						a.setAttribute('style', `width: ${88/(this.productData[0].length-1)}%` )
+					}
+				})
+				const ths = [...document.querySelectorAll('.productDetails th')]
+				ths.map(a => {
+					if (!a.classList.contains('amount')) {
+						a.setAttribute('style', `width: ${88/(this.productData[0].length-1)}%` )
+					}
+				})
+			},
+			date(days = '0') {
+				const d = new Date();
+				return (d.getDate() + Number(days)) + ' ' + d.toLocaleString('default', { month: 'long' }) + ' ' + (d.getYear() + 1900);
+			},
+			edit(event) {
+				event.stopPropagation()
+				event.currentTarget.classList.add('editing');
+				event.currentTarget.contentEditable = true;
+				event.currentTarget.innerHTML === '&nbsp;' ? event.currentTarget.innerHTML = ''  : '';
+			},
+			update(event, dataProp) {
+				const el = event.currentTarget
+				if (Array.isArray(this[dataProp])) {
+					const arrayName = Number(el.classList[1].split('-')[0])
+					const arrayIndex = Number(el.classList[1].split('-')[1])
+					const subArrayIndex = Number(el.classList[1].split('-')[2])
+					if (el.classList[1].split('-')[2]) {
+						this[dataProp][arrayIndex][subArrayIndex] = el.innerText
+					} else {
+						this[dataProp][arrayIndex] = el.innerText
+					}
+				} else {
+					this[dataProp] = el.innerText.replace(/(?:\r\n|\r|\n)/g, '<br>')
+				}
+			},
+			checkLogo() {
+				const logoDiv = document.querySelector('.logo-wrap');
+				const remLogo = document.querySelector('.logo-wrap .remove-logo');
+				if (this.logo.length) {
+					const logo = document.createElement('img')
+					logo.src = this.logo
+					logo.classList.add('logoImg')
+					logo.alt = 'logoImg'
+					logoDiv.append(logo)
+					remLogo.classList.add('show')
+				}
+			},
+			fixInput() {
+				const label = document.querySelector( '.img-upload-label' );
+				label.addEventListener('mousedown', () => {
+					document.querySelector('.img-upload').click()
+				})
+			},
+			uploadImg() {
+				const input = document.querySelector('.img-upload');
+				const logoDiv = document.querySelector('.logo-wrap');
+				const remLogo = document.querySelector('.logo-wrap .remove-logo');
+				const file = input.files[0];
+				if (file) {
+					const reader = new FileReader();
+					reader.readAsDataURL(file);
+					reader.addEventListener('load', () => {
+						this.logo = reader.result 
+						if (logoDiv.querySelector('img')) {
+							const logo = logoDiv.querySelector('img')
+							logo.setAttribute('src', reader.result)
+						} else {
+							const logo = document.createElement('img')
+							logo.src = this.logo
+							logo.classList.add('logoImg')
+							logo.alt = 'logoImg'
+							logoDiv.append(logo)
+						}
+						remLogo.classList.add('show')
+					})
+				}
+			},
+			removeLogo() {
+				const remLogo = document.querySelector('.logo-wrap .remove-logo');
+				const logo = document.querySelector('.logo-wrap img');
+				const input = document.querySelector('.img-upload');
+				if (confirm('Are you sure you want to remove this logo?')) {
+					this.logo = '';
+					logo.remove();
+					remLogo.classList.remove('show')
+					input.files = []
+				}
+			},
+			doAmountTds() {
+				const tr = document.querySelectorAll('.productDetails tbody .row');
+				tr.forEach(a => {
+					const p = a.querySelectorAll('td p')
+					p[p.length-2].classList.contains('amount') ? p[p.length-2].classList.remove('amount') : '';
+					p[p.length-1].classList.add('amount')
+					p[p.length-1].addEventListener('blur', () => {
+						this.calcTotal()
+					})
+				})
+			},
+			calcTax() {
+				// const taxPer = (Number(this.taxAmount) / Number(this.total.slice(1))) * 100;
+				// this.taxPercentage = isFinite(taxPer) === false ? 0 : Math.round((taxPer + Number.EPSILON) * 100) / 100;
+				let num = document.querySelector('.tax').innerText;
+				!num.endsWith('%') ? num = num + '%' : '';
+				const total = this.productData.reduce((acc, a) => {
+					return acc + Number(a[a.length-1])
+				}, 0)
+				const taxAm = (Number(num.slice(0, -1)) / 100) * total;
+				this.taxAmount = isFinite(taxAm) !== true ? 0 : Math.round((taxAm + Number.EPSILON) * 100) / 100;
+				this.taxPercentage = num;
+			},
+			calcTotal() {
+				const amount = [...document.querySelectorAll('.amount')]
+				amount.map((a, ind) => {
+					// !a.innerText.startsWith('R') ? a.innerHTML = 'R' + a.innerHTML : '';
+					this.productData[ind][this.productData[ind].length-1] = Number(a.innerHTML.replace(/,/g, '.'))
+				})
+				this.total = this.productData.reduce((acc, a) => {
+					return acc + a[a.length-1]
+				}, 0) + this.taxAmount
+				this.total = Math.round((this.total + Number.EPSILON) * 100) / 100;
+				this.calcTax()
+			},
+			showOptions() {
+				const opt = document.querySelectorAll('.option');
+				opt.forEach(i => i.setAttribute('style', 'opacity: 1; pointer-events: all;'))
+			},
+			hideOptions() {
+				const opt = document.querySelectorAll('.option');
+				opt.forEach(i => i.setAttribute('style', ''))
+			},
+			addRow() {
+				const newArr = Array.apply(null, Array(this.productData[0].length-1)).map(i => i = 'Add text')
+				newArr.push(0)
+				this.productData.push(newArr)
+			},
+			removeRow() {
+				if (this.productData.length > 1) {
+					this.productData.pop()
+				}
+			},
+			addColumn() {
+				this.productData.map(a => {
+					const last = a[a.length-1]
+					a.splice(-1, 1, 'Add text', last)
+				})
+				const lastTitle = this.title[this.title.length-1]
+				this.title.splice(-1, 1, 'Title', lastTitle)
+			},
+			removeColumn() {
+				this.productData.map(a => {
+					const last = a[a.length-1]
+					if (a.length > 2) {
+						a.splice(-2, 2, last)
+					}
+				})
+				if (this.title.length > 2) {
+					const lastTitle = this.title[this.title.length-1]
+					this.title.splice(-2, 2, lastTitle)
+				}
+			},
+			print() {
+				const restorepage = $('body').html();
+				const printcontent = $('.page').clone();
+				const mediaQueryList = window.matchMedia(' (min-width: 550px) ');
+				this.save();
+				function a4() {
+					printcontent.attr('style', 'font-family: Montserrat, sans-serif; color: #53565d; box-shadow: none; padding: 30px 30px 300px; min-height: 710px');
+				}
+				function letter() {
+					printcontent.attr('style', 'font-family: Montserrat, sans-serif; color: #53565d; box-shadow: none; padding: 30px 30px 300px; min-height: 640px');
+				}
+				if (mediaQueryList.matches) {  
+				    letter()
+				} else { 
+				    a4()
+				} 
+				mediaQueryList.addListener(function(mql) {
+				    if (mql.matches) {
+				        letter()
+				    } else {
+				        a4()
+				    }
+				})
+				printcontent.find('.footer').attr('style', 'bottom: 20px; width: calc(100% - 60px); left: 30px;')
+				$('body').empty().html(printcontent);
+				window.print();
+				$('body').html(restorepage);
+				window.location.reload()
+			},
+			save() {
+				try {
+					const saved = document.querySelector('.saved');
+					localStorage.data = JSON.stringify(this._data);
+					saved.classList.add('show')
+					setTimeout(() => saved.classList.remove('show'), 2000)
+				} catch(e) {
+					alert('ERROR: Not saved!\nPlease make sure you have allowed sites to save and read cookie data in your browser settings.')
+				}
+			},
+			reset() {
+				if (confirm('Are you sure you want to reset all the table values?')) {
+					localStorage.clear();
+					window.location.reload()
+				}
+			},
+			changeCurrency() {
+				const curr = prompt('Insert a currency symbol that you would like to use.')
+				this.currency = curr ? curr : this.currency
+			}
+		}
+	})
+	
+</script>
+	
+</body>
+</html>
