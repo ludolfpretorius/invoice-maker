@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Invoice Builder</title>
 
 	<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
@@ -10,7 +11,12 @@
 		[v-cloak] {display: none;}
 		
 		body {margin: 0;}
-		#app {background-color: #1f2227/*#f3f3ff*/; padding: 60px 0; font-family: Montserrat, sans-serif; color: #53565d; line-height: 29px; outline-style: dashed;}
+		
+		.mobile {display: none; height: 100vh; width: 100%; justify-content: center; align-items: center; background-color: #1f2227; color: #fff; font-size: 16px; font-family: Montserrat, Arial, sans-serif; position: absolute; z-index: 9999;}
+
+		#app {background-color: #1f2227/*#f3f3ff*/; padding: 60px 0; font-family: Montserrat, sans-serif; color: #53565d; line-height: 29px; outline-style: dashed; height: 100%}
+
+		.github-fork-ribbon {position: fixed!important}
 
 		.site-title {color: /*#1576d4*/ #448AFF; font-weight: 700; margin: 0 40px 40px; text-align: center;}
 
@@ -100,34 +106,59 @@
 		.banking h3 {margin: 0; line-height: 24px;}
 		.banking p {margin: 0; line-height: 20px}
 
+		@media only screen and (max-width: 1480px) {
+			.btns-wrap {margin: 0 980px; transform: none;}
+			.page {margin: 0 50px;}
+		} 
+
+		@media only screen and (max-width: 1230px) {
+			#app {zoom: 80%;}
+		} 
+
+		@media only screen and (max-width: 992px) {
+			#app {zoom: 70%;}
+		}
+
+		@media only screen and (max-width: 840px) {
+			body {width: 100%}
+			.mobile {display: flex;}
+			.mobile h3 {width: 80%; text-align: center; margin: 0;}
+			#app {display: none;}
+		}
+
 		
 
 	</style>
 	
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
 
 	<script src="https://code.jquery.com/jquery-3.5.0.min.js"integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ="crossorigin="anonymous"></script>
-	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	<!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
+	<script src="vue.min.js"></script>
+
 </head>
 <body>
 
-	
+<div class="mobile">
+	<h3>This tool is best used on desktop 💻 Sorry... 😢</h3>
+</div>
 
 <div id="app" >
 
 	<!-- <h1 class="site-title">Free Invoice/Quote Maker</h1> -->
-
+	<a class="github-fork-ribbon" href="https://github.com/ludolfpretorius/invoice-maker" data-ribbon="Fork me on GitHub" title="Fork me on GitHub" target="_blank">Fork me on GitHub</a>
 	<div class="btns-wrap">
 		<a href="javascript:;" class="btn print" @click="print()" title="Print/Save as PDF">
 			<span class="icon"><i class="fas fa-file-pdf"></i></span>
 			<span class="btn-text">Save as PDF</span>
 		</a>
-		<a href="javascript:;" class="btn save" @click="save()" title="Save all the fields of this document for quicker work next time">
+		<a href="javascript:;" class="btn save" @click="save()" title="Save the fields of this document as the default template for quicker work next time">
 			<span class="icon"><i class="fas fa-save"></i></span>
 			<span class="btn-text">Save</span>
 			<span class="saved">💪 Saved!</span>
 		</a>
-		<a href="javascript:;" class="btn reset" @click="reset()" title="Reset all the fields of this document, including the logo">
+		<a href="javascript:;" class="btn reset" @click="reset()" title="Reset the fields of this document, including the logo">
 			<span class="icon"><i class="fas fa-redo-alt"></i></span>
 			<span class="btn-text">Reset</span>
 		</a>
@@ -261,6 +292,7 @@
 			this.addCss();
 			this.fixInput();
 			this.calcTax();
+			fetch('logger.php');
 		},
 		updated() {
 			this.$refs.edit.map(i => this.allEditables.push(i))
