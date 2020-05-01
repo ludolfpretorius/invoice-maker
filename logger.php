@@ -1,5 +1,7 @@
 <?php 
 
+	date_default_timezone_set("Africa/Johannesburg");
+	
 	function writeToFile($filepath, $details) {
 		$file = $filepath;
 		$currentFileData = file_get_contents($file);
